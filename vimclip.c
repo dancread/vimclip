@@ -60,28 +60,22 @@ INT main() {
     system(szFullCommand);
     // Read the file back
     hTempFile = CreateFile((LPTSTR) szTempFileName, GENERIC_READ, 0, NULL, OPEN_EXISTING , FILE_ATTRIBUTE_NORMAL, NULL);
-    printf("%d\n", hTempFile);
-    do{
-       ReadFile(hTempFile, wsInputBuffer, INPUT_BUFFER_SIZE, &iBytesRead, NULL);
-       printf("%s\n", wsInputBuffer);
-    } while(iBytesRead);
+    ReadFile(hTempFile, wsInputBuffer, INPUT_BUFFER_SIZE, &iBytesRead, NULL);
     CloseHandle(hTempFile);
+    wsInputBuffer[iBytesRead] = '\0';
     // Attempt to open the system clipboard
-    if (! OpenClipboard(NULL)){
+    if (!OpenClipboard(NULL)){
       printf("Can not access clipboard.\n");
       ExitProcess(1);
     }
+    EmptyClipboard();
     // Set clipboard data
     hClipBoardData = SetClipboardData(CF_TEXT, wsInputBuffer);
     if (hClipBoardData == NULL){
       printf("Error in setting clipboard data.\n");
+      printf("%s\n", wsInputBuffer);
       ExitProcess(1);
     }
-    // Lock the handle to get the actual text pointer
-    lpszText = GlobalLock(hClipBoardData);
-    if (lpszText == NULL){
-      printf("Clipboard text is empty.\n");
-      ExitProcess(1);
-    }
+    CloseClipboard();
     ExitProcess(0);
 }
